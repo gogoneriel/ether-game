@@ -1,6 +1,7 @@
 import type { GameCosmetics, GameGear } from '@/game/cosmetics';
 
-type Handler = (...args: unknown[]) => void;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Handler = (...args: any[]) => void;
 
 /** Minimal browser-safe EventEmitter (no Node `events` dependency). */
 class TinyEmitter {
@@ -33,7 +34,8 @@ class TinyEmitter {
     return this.off(event, handler);
   }
 
-  emit(event: string | symbol, ...args: unknown[]): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  emit(event: string | symbol, ...args: any[]): boolean {
     const set = this.listeners.get(event);
     if (!set || set.size === 0) return false;
     for (const handler of [...set]) handler(...args);
