@@ -55,4 +55,6 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md). PRs that touch wallet, mint, or LiberW
 
 ## CI
 
-GitHub Actions runs unit checks, server integration, and typecheck on every push/PR (`.github/workflows/ci.yml`). Template copy also kept at [docs/ci-workflow.yml](./docs/ci-workflow.yml).
+GitHub Actions workflow: [`.github/workflows/ci.yml`](./.github/workflows/ci.yml) (unit + server integration + typecheck). Template copy: [docs/ci-workflow.yml](./docs/ci-workflow.yml).
+
+If runs show **startup_failure** with empty jobs, check [githubstatus.com](https://www.githubstatus.com) — Actions outages prevent runners from starting. Re-run via Actions → CI → Run workflow when the platform is healthy.
