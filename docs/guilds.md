@@ -26,25 +26,33 @@ Exact SLETH↔token equivalence (oracle vs fixed ratio) is an open question belo
 
 A player may equip **at most one guild card** for a given match / session. Common (bronze/silver/gold) cards are unaffected by this rule.
 
-## Guilds & name shortlist
+## Chosen guild names (defaults)
 
-Pick one English name per guild (community / founder choice). Suggestions:
-
-| Project | Token | Name options |
+| Project | Token | **Guild name** |
 |---------|-------|----------------|
-| Uniswap | UNI | Legendary Unicorns · The Hornguard · Unicorn Vanguard |
-| EtherFi | ETHFI | Ether Wardens · The Restaked Order · Boundless Vault |
-| Aave | AAVE | Phantom Court · Ghostlight Covenant · The Spectral Lenders |
-| Liquity | LQTY | Tidecallers · The Liquid Legion · Zero-Fee Corsairs |
-| Synthetix | SNX | Spartan Synths · The Synthforged · Oracle Spartans |
-| TrueFi | TRU | The Trueborn · Oathkeepers · Creed of Trust |
-| Over | OVER | Horizon Keepers · The Overworld Pioneers · Overlight Order |
-| Arbitrum | ARB | Nitro Knights · Odyssey Vanguard · Nova Sentinels |
-| Rocket Pool | RPL | The Rocketeers · Launch Brigade · Astral Poolers |
+| Uniswap | UNI | **Legendary Unicorns** |
+| EtherFi | ETHFI | **Ether Wardens** |
+| Aave | AAVE | **Phantom Court** |
+| Liquity | LQTY | **Tidecallers** |
+| Synthetix | SNX | **Spartan Synths** |
+| TrueFi | TRU | **The Trueborn** |
+| Over | OVER | **Horizon Keepers** |
+| Arbitrum | ARB | **Nitro Knights** |
+| Rocket Pool | RPL | **The Rocketeers** |
+
+### Name shortlist (alternatives)
+
+- **Uniswap (UNI)**: Legendary Unicorns · The Hornguard · Unicorn Vanguard
+- **EtherFi (ETHFI)**: Ether Wardens · The Restaked Order · Boundless Vault
+- **Aave (AAVE)**: Phantom Court · Ghostlight Covenant · The Spectral Lenders
+- **Liquity (LQTY)**: Tidecallers · The Liquid Legion · Zero-Fee Corsairs
+- **Synthetix (SNX)**: Spartan Synths · The Synthforged · Oracle Spartans
+- **TrueFi (TRU)**: The Trueborn · Oathkeepers · Creed of Trust
+- **Over (OVER)**: Horizon Keepers · The Overworld Pioneers · Overlight Order
+- **Arbitrum (ARB)**: Nitro Knights · Odyssey Vanguard · Nova Sentinels
+- **Rocket Pool (RPL)**: The Rocketeers · Launch Brigade · Astral Poolers
 
 ## Suggested signature attributes (draft)
-
-To be confirmed before implementation:
 
 | Guild token | Signature attr (draft) | Flavor |
 |-------------|------------------------|--------|

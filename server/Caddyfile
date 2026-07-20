@@ -1,4 +1,4 @@
-srv1698379.hstgr.cloud {
+{$GAME_HOST:localhost} {
 	encode gzip
 	handle /healthz {
 		reverse_proxy game-server:8080
@@ -7,6 +7,6 @@ srv1698379.hstgr.cloud {
 		reverse_proxy game-server:8080
 	}
 	handle {
-		respond "liber-game ok" 200
+		respond "ether-game ok" 200
 	}
 }

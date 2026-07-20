@@ -26,12 +26,21 @@ npm run dev
 # → open the Vite URL (usually http://localhost:5173)
 ```
 
-Optional multiplayer (local):
+### Optional multiplayer (local)
+
+The harness stubs `GET /api/game/ws-token` with `GAME_WS_SECRET` (default `dev-test-secret`) so `GameSocket` can join a local server.
 
 ```bash
+# Terminal A — WS server
 cd server && npm install
 GAME_WS_SECRET=dev-test-secret npm start
-# in another terminal, from repo root:
+
+# Terminal B — harness with multiplayer
+cd harness
+VITE_ENABLE_MULTIPLAYER=1 npm run dev
+# → http://localhost:5173
+
+# Optional integration suite (repo root):
 GAME_WS_SECRET=dev-test-secret npm run verify:server
 ```
 
@@ -46,5 +55,4 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md). PRs that touch wallet, mint, or LiberW
 
 ## CI
 
-GitHub Actions workflow template: [docs/ci-workflow.yml](./docs/ci-workflow.yml).
-Copy to `.github/workflows/ci.yml` after granting the `workflow` OAuth scope (`gh auth refresh -s workflow`).
+GitHub Actions runs unit checks, server integration, and typecheck on every push/PR (`.github/workflows/ci.yml`). Template copy also kept at [docs/ci-workflow.yml](./docs/ci-workflow.yml).

@@ -21,6 +21,8 @@ services:
   caddy:
     image: caddy:2-alpine
     restart: unless-stopped
+    environment:
+      GAME_HOST: ${GAME_HOST:-localhost}
     ports:
       - "80:80"
       - "443:443"

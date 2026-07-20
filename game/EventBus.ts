@@ -1,8 +1,52 @@
-import { EventEmitter } from 'events';
 import type { GameCosmetics, GameGear } from '@/game/cosmetics';
 
+type Handler = (...args: unknown[]) => void;
+
+/** Minimal browser-safe EventEmitter (no Node `events` dependency). */
+class TinyEmitter {
+  private listeners = new Map<string | symbol, Set<Handler>>();
+
+  on(event: string | symbol, handler: Handler): this {
+    let set = this.listeners.get(event);
+    if (!set) {
+      set = new Set();
+      this.listeners.set(event, set);
+    }
+    set.add(handler);
+    return this;
+  }
+
+  once(event: string | symbol, handler: Handler): this {
+    const wrap: Handler = (...args) => {
+      this.off(event, wrap);
+      handler(...args);
+    };
+    return this.on(event, wrap);
+  }
+
+  off(event: string | symbol, handler: Handler): this {
+    this.listeners.get(event)?.delete(handler);
+    return this;
+  }
+
+  removeListener(event: string | symbol, handler: Handler): this {
+    return this.off(event, handler);
+  }
+
+  emit(event: string | symbol, ...args: unknown[]): boolean {
+    const set = this.listeners.get(event);
+    if (!set || set.size === 0) return false;
+    for (const handler of [...set]) handler(...args);
+    return true;
+  }
+
+  setMaxListeners(_n: number): this {
+    return this;
+  }
+}
+
 /** Shared React ↔ Phaser bus (module singleton). */
-export const EventBus = new EventEmitter();
+export const EventBus = new TinyEmitter();
 
 export type GameFacing = 'up' | 'down' | 'left' | 'right';
 export type GameMapKey = 'town' | 'forest';
