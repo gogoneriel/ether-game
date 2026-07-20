@@ -1,0 +1,12 @@
+srv1698379.hstgr.cloud {
+	encode gzip
+	handle /healthz {
+		reverse_proxy game-server:8080
+	}
+	handle /ws {
+		reverse_proxy game-server:8080
+	}
+	handle {
+		respond "liber-game ok" 200
+	}
+}

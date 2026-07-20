@@ -1,0 +1,27 @@
+{
+  "name": "ether-game",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Ether Game — open-source Phaser town + multiplayer core (graphics & content). Wallet adapters live in LiberWallet.",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "npm run dev --prefix harness",
+    "build:harness": "npm run build --prefix harness",
+    "postinstall": "npm install --prefix harness --ignore-scripts && npm install --prefix server --ignore-scripts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test:interp": "node scripts/verify-interp-buffer.mjs",
+    "test:stale": "node scripts/verify-stale-remote.mjs",
+    "test:unit": "npm run test:interp && npm run test:stale",
+    "server": "npm start --prefix server",
+    "verify:server": "node scripts/verify-game-server.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "phaser": "^3.87.0",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

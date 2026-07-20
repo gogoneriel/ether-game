@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HUD verify</title>
+  <style>
+    :root { --bg-surface: #FFFFFF; --bg-surface-muted: #F9FAFB; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: #0f1c14; color: #fff; }
+    .stage {
+      position: relative;
+      margin: 16px auto;
+      width: min(960px, 100%);
+      height: 560px;
+      border: 1px solid rgba(16,185,129,0.25);
+      border-radius: 16px;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.15), transparent),
+        radial-gradient(circle at 40% 50%, #3a7a4a 0%, #1a3d28 55%, #0f1c14 100%);
+    }
+    .stage.mobile { width: 375px; height: 560px; }
+
+    .bg-neutral-950, .bg-neutral-900 { background-color: var(--bg-surface) !important; }
+    .bg-black\/30, .bg-neutral-950\/80 { background-color: var(--bg-surface-muted) !important; }
+
+    .game-hud-panel { background-color: rgba(9, 18, 14, 0.94) !important; }
+    .game-hud-chip  { background-color: #14251d !important; }
+    .game-hud-input { background-color: #10201a !important; color: #fff !important; }
+
+    .profile {
+      position: absolute; left: 8px; top: 8px;
+      width: 46%; max-width: 240px;
+      border-radius: 16px; border: 1px solid rgba(52,211,153,0.35);
+      padding: 8px; box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    }
+    .stage:not(.mobile) .profile { width: 240px; padding: 10px; }
+    .bal {
+      display: flex; justify-content: space-between; align-items: center;
+      border-radius: 8px; border: 1px solid rgba(4,120,87,0.5);
+      padding: 4px 8px; font-size: 11px; margin-top: 4px;
+    }
+    .top-right {
+      position: absolute; right: 8px; top: 8px;
+      max-width: 48%; display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+    }
+    .stage:not(.mobile) .top-right { max-width: none; }
+    .clock {
+      border-radius: 8px; border: 1px solid rgba(4,120,87,0.6);
+      padding: 4px 8px; font: 700 11px/1 monospace; color: #ecfdf5;
+    }
+    .minimap {
+      width: 56px; height: 56px; border-radius: 10px;
+      background: #064e3b; border: 1px solid rgba(52,211,153,0.4);
+    }
+    .stage:not(.mobile) .minimap { width: 72px; height: 72px; }
+    .quest {
+      border-radius: 12px; border: 1px solid rgba(251,191,36,0.4);
+      padding: 8px; width: auto; font-size: 10px; font-weight: 800;
+      letter-spacing: 0.04em; text-transform: uppercase; color: #fde68a;
+    }
+    .hotbar {
+      position: absolute; left: 50%; bottom: 12px; transform: translateX(-50%);
+      display: flex; gap: 4px;
+    }
+    .slot {
+      width: 36px; height: 36px; border-radius: 12px;
+      border: 1px solid rgba(52,211,153,0.3); color: #ecfdf5;
+      display: grid; place-items: center; font-size: 12px;
+    }
+    h2 { text-align: center; color: #a7f3d0; font-size: 14px; margin: 20px 0 0; }
+    #result { text-align: center; padding: 12px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <div id="result">Checking…</div>
+
+  <h2>Desktop (should be dark, readable SLETH/LETH)</h2>
+  <div class="stage" id="desktop">
+    <div class="profile game-hud-panel">
+      <div style="font-weight:800;font-size:12px">0xc234…e5d5</div>
+      <div style="color:#6ee7b7;font-size:10px;font-weight:600">Lv 1</div>
+      <div class="bal game-hud-chip"><span style="color:#34d399;font-weight:700">SLETH</span><span style="font-family:monospace;font-weight:600">12.5</span></div>
+      <div class="bal game-hud-chip"><span style="color:#fcd34d;font-weight:700">LETH</span><span style="font-family:monospace;font-weight:600">0.02</span></div>
+    </div>
+    <div class="top-right">
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <div class="clock game-hud-chip">16:04</div>
+        <div class="minimap"></div>
+      </div>
+      <div class="quest game-hud-panel">Quest Tracker ▾</div>
+    </div>
+    <div class="hotbar">
+      <div class="slot game-hud-panel">I</div>
+      <div class="slot game-hud-panel">C</div>
+      <div class="slot game-hud-panel">Q</div>
+      <div class="slot game-hud-panel">G</div>
+      <div class="slot game-hud-panel">M</div>
+      <div class="slot game-hud-panel">⚙</div>
+    </div>
+  </div>
+
+  <h2>Mobile 375px (compact top, no overlap)</h2>
+  <div class="stage mobile" id="mobile">
+    <div class="profile game-hud-panel">
+      <div style="font-weight:800;font-size:12px">0xc234…e5d5</div>
+      <div style="color:#6ee7b7;font-size:10px;font-weight:600">Lv 1</div>
+      <div class="bal game-hud-chip"><span style="color:#34d399;font-weight:700">SLETH</span><span style="font-family:monospace;font-weight:600">12.5</span></div>
+      <div class="bal game-hud-chip"><span style="color:#fcd34d;font-weight:700">LETH</span><span style="font-family:monospace;font-weight:600">0.02</span></div>
+    </div>
+    <div class="top-right">
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px">
+        <div class="minimap"></div>
+        <div class="clock game-hud-chip">16:04</div>
+      </div>
+      <div class="quest game-hud-panel">Quest Tracker ▾</div>
+    </div>
+    <div class="hotbar">
+      <div class="slot game-hud-panel">I</div>
+      <div class="slot game-hud-panel">C</div>
+      <div class="slot game-hud-panel">Q</div>
+      <div class="slot game-hud-panel">G</div>
+      <div class="slot game-hud-panel">M</div>
+      <div class="slot game-hud-panel">⚙</div>
+    </div>
+  </div>
+
+  <script>
+    const alone = document.createElement('div');
+    alone.className = 'game-hud-panel';
+    document.body.appendChild(alone);
+    const aloneBg = getComputedStyle(alone).backgroundColor;
+
+    const both = document.createElement('div');
+    both.className = 'bg-neutral-950 game-hud-panel';
+    document.body.appendChild(both);
+    const bothBg = getComputedStyle(both).backgroundColor;
+
+    const dark = (c) => c.includes('9, 18, 14') || c.includes('9,18,14');
+    const ok = dark(aloneBg) && dark(bothBg);
+
+    const mob = document.getElementById('mobile');
+    const p = mob.querySelector('.profile').getBoundingClientRect();
+    const tr = mob.querySelector('.top-right').getBoundingClientRect();
+    const overlap = !(p.right <= tr.left || tr.right <= p.left);
+    const gap = Math.round(tr.left - p.right);
+
+    const result = document.getElementById('result');
+    result.textContent =
+      (ok ? 'PASS dark (' + aloneBg + ')' : 'FAIL dark got ' + aloneBg + ' / ' + bothBg) +
+      (overlap ? ' | FAIL mobile overlap' : ' | PASS mobile gap ' + gap + 'px');
+    document.title = ok && !overlap ? 'HUD verify PASS' : 'HUD verify FAIL';
+    alone.remove();
+    both.remove();
+  </script>
+</body>
+</html>
