@@ -43,3 +43,8 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md). PRs that touch wallet, mint, or LiberW
 
 - **Code**: [MIT](./LICENSE)
 - **Assets**: see [assets/CREDITS.md](./assets/CREDITS.md) (CC0 / LPC / pack-specific terms)
+
+## CI
+
+GitHub Actions workflow template: [docs/ci-workflow.yml](./docs/ci-workflow.yml).
+Copy to `.github/workflows/ci.yml` after granting the `workflow` OAuth scope (`gh auth refresh -s workflow`).
