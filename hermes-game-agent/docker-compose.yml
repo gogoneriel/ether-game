@@ -1,0 +1,40 @@
+services:
+  hermes-game-agent:
+    build: .
+    container_name: hermes-game-agent
+    restart: unless-stopped
+    environment:
+      PORT: "8080"
+      AGENT_SECRET: ${AGENT_SECRET}
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY}
+      OPENROUTER_MODEL: ${OPENROUTER_MODEL:-z-ai/glm-5.2}
+      OPENROUTER_BASE_URL: ${OPENROUTER_BASE_URL:-https://openrouter.ai/api/v1}
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      REPO_URL: ${REPO_URL:-https://github.com/gogoneriel/ether-game.git}
+      REPO_DIR: /data/ether-game
+      REPO_REFRESH_MS: ${REPO_REFRESH_MS:-3600000}
+      KNOWLEDGE_PACK_PATH: /app/knowledge/pack.md
+    volumes:
+      - hermes_repo:/data/ether-game
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://127.0.0.1:8080/healthz').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  hermes_repo:
