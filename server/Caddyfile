@@ -6,6 +6,10 @@
 	handle /ws {
 		reverse_proxy game-server:8080
 	}
+	# Hermes Game Architect (sibling container on liber-game_default network)
+	handle /agent/* {
+		reverse_proxy hermes-game-agent:8080
+	}
 	handle {
 		respond "ether-game ok" 200
 	}
