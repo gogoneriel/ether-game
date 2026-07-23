@@ -2,7 +2,10 @@
 # Game WS stack lives under server/docker-compose.yml (deployed as liber-game).
 services:
   hermes-game-agent:
-    build: ./hermes-game-agent
+    build:
+      context: ./hermes-game-agent
+      args:
+        CACHEBUST: "pain-2026-07-23b"
     container_name: hermes-game-agent
     restart: unless-stopped
     environment:
