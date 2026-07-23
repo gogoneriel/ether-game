@@ -1,5 +1,8 @@
 FROM node:22-bookworm-slim
 
+# Hostinger recreate often skips rebuild; bump CACHEBUST via compose build.args to force a fresh image.
+ARG CACHEBUST=1
+
 RUN apt-get update \
   && apt-get install -y --no-install-recommends git ca-certificates \
   && rm -rf /var/lib/apt/lists/*
