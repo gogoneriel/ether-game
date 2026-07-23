@@ -1,5 +1,6 @@
 import http from 'node:http';
 import { requireAgentSecret } from './auth.mjs';
+import { loadDesignDocs } from './designDocs.mjs';
 import { loadKnowledgePack } from './knowledge.mjs';
 import {
   chatCompletion,
@@ -42,6 +43,7 @@ async function readJson(req) {
 async function runChat({ message, history, mode }) {
   const persona = resolvePersona(mode);
   const pack = loadKnowledgePack();
+  const design = loadDesignDocs();
 
   /** @type {Array<{ role: string, content?: string, tool_calls?: object[], tool_call_id?: string, name?: string }>} */
   const messages = [
@@ -49,6 +51,10 @@ async function runChat({ message, history, mode }) {
     {
       role: 'system',
       content: `Knowledge pack (${pack.missing ? 'FALLBACK' : 'loaded'}${pack.truncated ? ', truncated' : ''}):\n\n${pack.text}`,
+    },
+    {
+      role: 'system',
+      content: `Live design docs (synced from repo${design.truncated ? ', truncated' : ''}; files: ${(design.files || []).join(', ') || 'none'}):\n\n${design.text}`,
     },
   ];
 
@@ -119,6 +125,8 @@ async function runChat({ message, history, mode }) {
     toolTrace,
     model: process.env.OPENROUTER_MODEL || 'z-ai/glm-5.2',
     knowledgeMissing: pack.missing,
+    designDocs: design.files || [],
+    designDocsMissing: design.missing,
   };
 }
 

@@ -9,3 +9,12 @@ server/node_modules/
 .DS_Store
 dist/
 .vite/
+.tmp/
+
+# Graphify (commit wiki + GRAPH_REPORT.md + graph.json; keep cache/html local)
+graphify-out/cache/
+graphify-out/graph.html
+graphify-out/obsidian/
+graphify-out/.graphify_*
+graphify-out/memory/
+graphify-out/reflections/
