@@ -128,9 +128,10 @@ export async function writeDesignDoc(args = {}) {
 
   const bodyText = content.endsWith('\n') ? content : `${content}\n`;
   const rawMsg = (args.message || `update ${norm.path}`).trim().slice(0, 200);
-  const message = rawMsg.startsWith('Hermes:')
-    ? rawMsg
-    : `Hermes: ${rawMsg}`;
+  const message =
+    rawMsg.startsWith('Pain:') || rawMsg.startsWith('Hermes:')
+      ? rawMsg
+      : `Pain: ${rawMsg}`;
   const name = gitAuthorName();
   const email = gitAuthorEmail();
   const { owner, repo } = repoSlug();

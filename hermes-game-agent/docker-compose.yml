@@ -20,6 +20,8 @@ services:
       GIT_AUTHOR_NAME: ${GIT_AUTHOR_NAME:-Pain2023}
       GIT_AUTHOR_EMAIL: ${GIT_AUTHOR_EMAIL:-Pain2023@users.noreply.github.com}
       DESIGN_DOCS_MAX_CHARS: ${DESIGN_DOCS_MAX_CHARS:-40000}
+      # Cursor Cloud Agents API — start_game_change / check_game_change → pain branch
+      CURSOR_API_KEY: ${CURSOR_API_KEY:-}
     volumes:
       - hermes_repo:/data/ether-game
     ports:

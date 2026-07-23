@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { checkGameChange, startGameChange } from './cursorAgents.mjs';
 import { openIssue, writeDesignDoc } from './github.mjs';
 import { listRepoTree, readRepoFile, syncRepo } from './repoSync.mjs';
 
@@ -107,7 +108,7 @@ export const TOOL_DEFINITIONS = [
     function: {
       name: 'write_design_doc',
       description:
-        'Commit a markdown design spec under docs/design/ as GitHub user Pain2023 (Hermes). Path must be under docs/design/ and end in .md. Always tell the user the commitUrl/fileUrl.',
+        'Commit a markdown design spec under docs/design/ as GitHub user Pain2023 (Pain). Path must be under docs/design/ and end in .md. Always tell the user the commitUrl/fileUrl.',
       parameters: {
         type: 'object',
         properties: {
@@ -122,7 +123,7 @@ export const TOOL_DEFINITIONS = [
           },
           message: {
             type: 'string',
-            description: 'Short commit message (Hermes: prefix added if missing)',
+            description: 'Short commit message (Pain: prefix added if missing)',
           },
         },
         required: ['path', 'content'],
@@ -147,6 +148,50 @@ export const TOOL_DEFINITIONS = [
           },
         },
         required: ['title'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'start_game_change',
+      description:
+        'Launch a Cursor Cloud agent that codes the owner request onto the LiberWallet `pain` preview branch (pain.liberether.com). Only one running change at a time. Always share agentUrl + previewUrl with the owner.',
+      parameters: {
+        type: 'object',
+        properties: {
+          request: {
+            type: 'string',
+            description: 'Plain-language description of the game change to implement',
+          },
+          specPath: {
+            type: 'string',
+            description:
+              'Optional path to a design doc already saved (e.g. docs/design/town-fountain-spec-v1.md)',
+          },
+          repo: {
+            type: 'string',
+            description: 'liberview (default) or ether-game',
+          },
+        },
+        required: ['request'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'check_game_change',
+      description:
+        'Check status of a Cursor Cloud agent started by start_game_change. When finished, tell the owner to open https://pain.liberether.com.',
+      parameters: {
+        type: 'object',
+        properties: {
+          id: {
+            type: 'string',
+            description: 'Agent id (bc-...). Optional if one was just started.',
+          },
+        },
       },
     },
   },
@@ -314,6 +359,10 @@ export async function runTool(name, args = {}) {
       return writeDesignDoc(args);
     case 'open_github_issue':
       return openIssue(args);
+    case 'start_game_change':
+      return startGameChange(args);
+    case 'check_game_change':
+      return checkGameChange(args);
     default:
       return { ok: false, error: `unknown_tool:${name}` };
   }
