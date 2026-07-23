@@ -12,57 +12,124 @@ export function repoUrl() {
   return (process.env.REPO_URL || DEFAULT_REPO).trim();
 }
 
-function runGit(args, cwd) {
+/** Classic PAT (or fine-grained) for Pain2023 — never logged. */
+export function githubToken() {
+  return (process.env.GITHUB_TOKEN || '').trim();
+}
+
+export function gitAuthorName() {
+  return (process.env.GIT_AUTHOR_NAME || 'Pain2023').trim();
+}
+
+export function gitAuthorEmail() {
+  return (
+    process.env.GIT_AUTHOR_EMAIL || 'Pain2023@users.noreply.github.com'
+  ).trim();
+}
+
+/**
+ * Public HTTPS URL → authenticated URL when GITHUB_TOKEN is set.
+ * Uses x-access-token form so the token never appears in git commit metadata.
+ */
+export function authenticatedRepoUrl(url = repoUrl()) {
+  const token = githubToken();
+  if (!token) return url;
+  try {
+    const u = new URL(url);
+    if (u.protocol !== 'https:') return url;
+    u.username = 'x-access-token';
+    u.password = token;
+    return u.toString();
+  } catch {
+    return url;
+  }
+}
+
+/** Redact token from strings before returning to the LLM / logs. */
+export function redactSecrets(text) {
+  if (!text) return text;
+  let out = String(text);
+  const token = githubToken();
+  if (token) out = out.split(token).join('[REDACTED]');
+  out = out.replace(
+    /https:\/\/x-access-token:[^@\s]+@/gi,
+    'https://x-access-token:[REDACTED]@',
+  );
+  out = out.replace(/ghp_[A-Za-z0-9]+/g, '[REDACTED]');
+  out = out.replace(/github_pat_[A-Za-z0-9_]+/g, '[REDACTED]');
+  return out;
+}
+
+export function runGit(args, cwd, envExtra = {}) {
   const result = spawnSync('git', args, {
     cwd,
     encoding: 'utf8',
     maxBuffer: 8 * 1024 * 1024,
+    env: {
+      ...process.env,
+      GIT_TERMINAL_PROMPT: '0',
+      ...envExtra,
+    },
   });
   return {
     ok: result.status === 0,
     status: result.status,
-    stdout: (result.stdout || '').trim(),
-    stderr: (result.stderr || '').trim(),
+    stdout: redactSecrets((result.stdout || '').trim()),
+    stderr: redactSecrets((result.stderr || '').trim()),
   };
+}
+
+/** Configure local commit identity for Pain2023 in the clone. */
+export function ensureGitIdentity(dir = repoDir()) {
+  const name = gitAuthorName();
+  const email = gitAuthorEmail();
+  runGit(['config', 'user.name', name], dir);
+  runGit(['config', 'user.email', email], dir);
+  return { name, email };
 }
 
 /** Shallow clone or pull. Safe to call on an interval. */
 export function syncRepo() {
   const dir = repoDir();
-  const url = repoUrl();
+  const publicUrl = repoUrl();
+  const url = authenticatedRepoUrl(publicUrl);
   mkdirSync(dir, { recursive: true });
 
   const gitDir = join(dir, '.git');
   if (!existsSync(gitDir)) {
-    // Clone into dir (must be empty-ish). If leftover files, clone to tmp then fail soft.
     const entries = existsSync(dir) ? readdirSync(dir) : [];
     if (entries.length === 0) {
       const clone = runGit(
         ['clone', '--depth', '1', '--single-branch', url, dir],
         process.cwd(),
       );
+      if (clone.ok) ensureGitIdentity(dir);
       return {
         action: 'clone',
         ok: clone.ok,
         detail: clone.ok ? 'cloned' : clone.stderr || clone.stdout,
         dir,
-        url,
+        url: publicUrl,
+        authenticated: Boolean(githubToken()),
       };
     }
     const clone = runGit(
       ['clone', '--depth', '1', '--single-branch', url, '.'],
       dir,
     );
+    if (clone.ok) ensureGitIdentity(dir);
     return {
       action: 'clone',
       ok: clone.ok,
       detail: clone.ok ? 'cloned-into-existing' : clone.stderr || clone.stdout,
       dir,
-      url,
+      url: publicUrl,
+      authenticated: Boolean(githubToken()),
     };
   }
 
   runGit(['remote', 'set-url', 'origin', url], dir);
+  ensureGitIdentity(dir);
   const fetch = runGit(['fetch', '--depth', '1', 'origin'], dir);
   if (!fetch.ok) {
     return {
@@ -70,7 +137,8 @@ export function syncRepo() {
       ok: false,
       detail: fetch.stderr || fetch.stdout,
       dir,
-      url,
+      url: publicUrl,
+      authenticated: Boolean(githubToken()),
     };
   }
   const pull = runGit(['reset', '--hard', 'origin/HEAD'], dir);
@@ -79,7 +147,8 @@ export function syncRepo() {
     ok: pull.ok,
     detail: pull.ok ? pull.stdout || 'updated' : pull.stderr || pull.stdout,
     dir,
-    url,
+    url: publicUrl,
+    authenticated: Boolean(githubToken()),
   };
 }
 

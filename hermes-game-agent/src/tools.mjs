@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import { openIssue, writeDesignDoc } from './github.mjs';
 import { listRepoTree, readRepoFile, syncRepo } from './repoSync.mjs';
 
 let supabase = null;
@@ -99,6 +100,54 @@ export const TOOL_DEFINITIONS = [
       name: 'sync_repo_now',
       description: 'Force a shallow git pull of the ether-game repository.',
       parameters: { type: 'object', properties: {} },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'write_design_doc',
+      description:
+        'Commit a markdown design spec under docs/design/ as GitHub user Pain2023 (Hermes). Path must be under docs/design/ and end in .md. Always tell the user the commitUrl/fileUrl.',
+      parameters: {
+        type: 'object',
+        properties: {
+          path: {
+            type: 'string',
+            description:
+              'Relative path, e.g. docs/design/sp-bank-spec-v1.md (or bare filename → docs/design/<name>)',
+          },
+          content: {
+            type: 'string',
+            description: 'Full markdown file body (max ~30k chars)',
+          },
+          message: {
+            type: 'string',
+            description: 'Short commit message (Hermes: prefix added if missing)',
+          },
+        },
+        required: ['path', 'content'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'open_github_issue',
+      description:
+        'Open a GitHub issue on gogoneriel/ether-game as Pain2023. Always tell the user the issue url.',
+      parameters: {
+        type: 'object',
+        properties: {
+          title: { type: 'string' },
+          body: { type: 'string', description: 'Markdown issue body' },
+          labels: {
+            type: 'array',
+            items: { type: 'string' },
+            description: 'Optional labels (must already exist on the repo)',
+          },
+        },
+        required: ['title'],
+      },
     },
   },
 ];
@@ -261,6 +310,10 @@ export async function runTool(name, args = {}) {
       return listRepoTree(args.path || '', Math.min(3, Number(args.depth) || 2));
     case 'sync_repo_now':
       return syncRepo();
+    case 'write_design_doc':
+      return writeDesignDoc(args);
+    case 'open_github_issue':
+      return openIssue(args);
     default:
       return { ok: false, error: `unknown_tool:${name}` };
   }
