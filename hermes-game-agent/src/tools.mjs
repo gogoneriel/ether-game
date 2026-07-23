@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { checkGameChange, startGameChange } from './cursorAgents.mjs';
-import { openIssue, writeDesignDoc } from './github.mjs';
+import { openIssue, shipPreview, writeDesignDoc } from './github.mjs';
 import { listRepoTree, readRepoFile, syncRepo } from './repoSync.mjs';
 
 let supabase = null;
@@ -195,6 +195,27 @@ export const TOOL_DEFINITIONS = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'ship_preview',
+      description:
+        'Open a GitHub PR from LiberWallet branch `pain` into `main` so the owner can merge the public Pain preview into production. Idempotent if a PR already exists. Never merge. Always share the prUrl.',
+      parameters: {
+        type: 'object',
+        properties: {
+          title: {
+            type: 'string',
+            description: 'Optional PR title',
+          },
+          body: {
+            type: 'string',
+            description: 'Optional PR body markdown',
+          },
+        },
+      },
+    },
+  },
 ];
 
 function sinceIso(days) {
@@ -363,6 +384,8 @@ export async function runTool(name, args = {}) {
       return startGameChange(args);
     case 'check_game_change':
       return checkGameChange(args);
+    case 'ship_preview':
+      return shipPreview(args);
     default:
       return { ok: false, error: `unknown_tool:${name}` };
   }

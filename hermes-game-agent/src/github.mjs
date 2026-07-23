@@ -281,3 +281,105 @@ export async function openIssue(args = {}) {
     author: gitAuthorName(),
   };
 }
+
+const LIBERVIEW_OWNER = 'gogoneriel';
+const LIBERVIEW_REPO = 'Liberview';
+const PREVIEW_BRANCH = 'pain';
+const PROD_BASE = 'main';
+const PREVIEW_URL = 'https://pain.liberether.com';
+
+/**
+ * Open (or reuse) a PR from pain → main on LiberWallet for the owner to merge.
+ * Requires Pain2023 Write access on gogoneriel/Liberview.
+ * @param {{ title?: string, body?: string }} args
+ */
+export async function shipPreview(args = {}) {
+  const tok = requireToken();
+  if (!tok.ok) return tok;
+
+  const owner = LIBERVIEW_OWNER;
+  const repo = LIBERVIEW_REPO;
+  const head = PREVIEW_BRANCH;
+  const base = PROD_BASE;
+
+  // Idempotent: return existing open PR if present.
+  const existing = await ghJson(
+    'GET',
+    `/repos/${owner}/${repo}/pulls?state=open&head=${owner}:${head}&base=${base}&per_page=5`,
+    tok.token,
+  );
+  if (existing.res.ok && Array.isArray(existing.json) && existing.json.length) {
+    const pr = existing.json[0];
+    return {
+      ok: true,
+      reused: true,
+      number: pr.number,
+      prUrl: pr.html_url,
+      title: pr.title,
+      head,
+      base,
+      previewUrl: PREVIEW_URL,
+      message:
+        'An open ship PR already exists. Tell the owner to review and merge it.',
+    };
+  }
+
+  const title = String(
+    args.title || 'Ship Pain preview → production',
+  )
+    .trim()
+    .slice(0, 200);
+  let body = String(
+    args.body ||
+      [
+        '## Summary',
+        `- Promote the public Pain sandbox (\`${head}\`) into LiberWallet production (\`${base}\`).`,
+        `- Preview: ${PREVIEW_URL}`,
+        '',
+        '## Test plan',
+        `- [ ] Open ${PREVIEW_URL} anonymously — game loads, no wallet login`,
+        `- [ ] Spot-check town / battle after merge on wallet.liberether.com`,
+        '',
+        '_Opened by Pain (Pain2023) via ship_preview. Does not merge automatically._',
+      ].join('\n'),
+  )
+    .trim()
+    .slice(0, 20_000);
+
+  const { res, json, text } = await ghJson(
+    'POST',
+    `/repos/${owner}/${repo}/pulls`,
+    tok.token,
+    { title, head, base, body },
+  );
+
+  if (!res.ok) {
+    return {
+      ok: false,
+      error: 'github_api_error',
+      status: res.status,
+      detail: redactSecrets(
+        (json && (json.message || JSON.stringify(json))) || text,
+      ).slice(0, 500),
+      hint:
+        res.status === 403 || res.status === 404
+          ? 'Invite Pain2023 as Write collaborator on gogoneriel/Liberview and use a classic PAT (repo scope).'
+          : undefined,
+      previewUrl: PREVIEW_URL,
+    };
+  }
+
+  return {
+    ok: true,
+    reused: false,
+    number: json?.number,
+    prUrl: json?.html_url,
+    title: json?.title,
+    head,
+    base,
+    previewUrl: PREVIEW_URL,
+    author: gitAuthorName(),
+    message:
+      'Ship PR opened. Tell the owner to review and merge on GitHub — nothing ships until they merge.',
+  };
+}
