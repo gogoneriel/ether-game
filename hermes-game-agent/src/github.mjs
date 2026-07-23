@@ -1,15 +1,9 @@
-import { mkdirSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
 import {
-  authenticatedRepoUrl,
-  ensureGitIdentity,
   githubToken,
   gitAuthorEmail,
   gitAuthorName,
   redactSecrets,
-  repoDir,
   repoUrl,
-  runGit,
   syncRepo,
 } from './repoSync.mjs';
 
@@ -42,10 +36,32 @@ function requireToken() {
     return {
       ok: false,
       error: 'github_token_not_configured',
-      hint: 'Set GITHUB_TOKEN (Pain2023 classic PAT with repo scope) on the Hermes VPS.',
+      hint: 'Set GITHUB_TOKEN to a Pain2023 classic PAT (ghp_...) with repo scope. Fine-grained tokens cannot write to another user personal repo.',
     };
   }
   return { ok: true, token };
+}
+
+async function ghJson(method, path, token, body) {
+  const res = await fetch(`${githubApiBase()}${path}`, {
+    method,
+    headers: {
+      accept: 'application/vnd.github+json',
+      authorization: `Bearer ${token}`,
+      'content-type': 'application/json',
+      'user-agent': 'hermes-game-agent',
+      'x-github-api-version': '2022-11-28',
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const text = await res.text();
+  let json = null;
+  try {
+    json = text ? JSON.parse(text) : null;
+  } catch {
+    json = { message: text.slice(0, 500) };
+  }
+  return { res, json, text };
 }
 
 /**
@@ -61,7 +77,6 @@ export function normalizeDesignPath(relPath) {
     return { ok: false, error: 'path_forbidden' };
   }
   if (!cleaned.startsWith('docs/design/')) {
-    // Allow bare filename → docs/design/<name>
     if (!cleaned.includes('/')) {
       cleaned = `docs/design/${cleaned}`;
     } else {
@@ -86,7 +101,9 @@ export function normalizeDesignPath(relPath) {
 }
 
 /**
- * Pull, write markdown under docs/design/, commit as Pain2023, push.
+ * Commit markdown under docs/design/ as Pain2023 via GitHub Contents API.
+ * Requires a classic PAT (ghp_...) with repo scope — fine-grained PATs cannot
+ * write to another user's personal repository even as a collaborator.
  * @param {{ path: string, content: string, message?: string }} args
  */
 export async function writeDesignDoc(args = {}) {
@@ -109,80 +126,91 @@ export async function writeDesignDoc(args = {}) {
     };
   }
 
-  const sync = syncRepo();
-  if (!sync.ok) {
-    return {
-      ok: false,
-      error: 'sync_failed',
-      detail: sync.detail,
-    };
-  }
-
-  const dir = repoDir();
-  ensureGitIdentity(dir);
-  const full = join(dir, ...norm.path.split('/'));
-  mkdirSync(dirname(full), { recursive: true });
-  writeFileSync(full, content.endsWith('\n') ? content : `${content}\n`, 'utf8');
-
-  const add = runGit(['add', '--', norm.path], dir);
-  if (!add.ok) {
-    return { ok: false, error: 'git_add_failed', detail: add.stderr || add.stdout };
-  }
-
-  const status = runGit(['status', '--porcelain', '--', norm.path], dir);
-  if (!status.stdout) {
-    return {
-      ok: true,
-      noop: true,
-      path: norm.path,
-      detail: 'no_changes',
-    };
-  }
-
+  const bodyText = content.endsWith('\n') ? content : `${content}\n`;
   const rawMsg = (args.message || `update ${norm.path}`).trim().slice(0, 200);
   const message = rawMsg.startsWith('Hermes:')
     ? rawMsg
     : `Hermes: ${rawMsg}`;
-
   const name = gitAuthorName();
   const email = gitAuthorEmail();
-  const commit = runGit(
-    ['commit', '-m', message],
-    dir,
-    {
-      GIT_AUTHOR_NAME: name,
-      GIT_AUTHOR_EMAIL: email,
-      GIT_COMMITTER_NAME: name,
-      GIT_COMMITTER_EMAIL: email,
-    },
-  );
-  if (!commit.ok) {
-    return {
-      ok: false,
-      error: 'git_commit_failed',
-      detail: commit.stderr || commit.stdout,
-    };
-  }
-
-  const sha = runGit(['rev-parse', 'HEAD'], dir);
-  const authUrl = authenticatedRepoUrl();
-  runGit(['remote', 'set-url', 'origin', authUrl], dir);
-  const push = runGit(['push', 'origin', 'HEAD'], dir);
-  if (!push.ok) {
-    return {
-      ok: false,
-      error: 'git_push_failed',
-      detail: push.stderr || push.stdout,
-      commitSha: sha.ok ? sha.stdout : undefined,
-    };
-  }
-
   const { owner, repo } = repoSlug();
-  const commitSha = sha.ok ? sha.stdout : '';
-  const commitUrl = commitSha
-    ? `https://github.com/${owner}/${repo}/commit/${commitSha}`
-    : `https://github.com/${owner}/${repo}`;
-  const fileUrl = `https://github.com/${owner}/${repo}/blob/main/${norm.path}`;
+  const apiPath = `/repos/${owner}/${repo}/contents/${norm.path}`;
+
+  // Fetch existing sha if file already exists (required for updates).
+  const existing = await ghJson('GET', apiPath, tok.token);
+  let sha;
+  if (existing.res.status === 200 && existing.json?.sha) {
+    sha = existing.json.sha;
+    const existingContent = Buffer.from(
+      existing.json.content || '',
+      'base64',
+    ).toString('utf8');
+    if (existingContent === bodyText) {
+      return {
+        ok: true,
+        noop: true,
+        path: norm.path,
+        detail: 'no_changes',
+        fileUrl: existing.json.html_url,
+      };
+    }
+  } else if (existing.res.status !== 404) {
+    const detail = redactSecrets(
+      existing.json?.message || existing.text || String(existing.res.status),
+    ).slice(0, 500);
+    return {
+      ok: false,
+      error: 'github_api_error',
+      status: existing.res.status,
+      detail,
+      hint:
+        existing.res.status === 403
+          ? 'Use a Pain2023 classic PAT (ghp_...) with repo scope. Fine-grained github_pat_ tokens cannot write to gogoneriel/ether-game.'
+          : undefined,
+    };
+  }
+
+  const payload = {
+    message,
+    content: Buffer.from(bodyText, 'utf8').toString('base64'),
+    committer: { name, email },
+    author: { name, email },
+  };
+  if (sha) payload.sha = sha;
+
+  const put = await ghJson('PUT', apiPath, tok.token, payload);
+  if (!put.res.ok) {
+    const detail = redactSecrets(
+      put.json?.message || put.text || String(put.res.status),
+    ).slice(0, 500);
+    return {
+      ok: false,
+      error: 'github_api_error',
+      status: put.res.status,
+      detail,
+      hint:
+        put.res.status === 403
+          ? 'Use a Pain2023 classic PAT (ghp_...) with repo scope. Fine-grained github_pat_ tokens cannot write to gogoneriel/ether-game.'
+          : undefined,
+    };
+  }
+
+  // Refresh local clone so live design-doc ingestion sees the new file soon.
+  try {
+    syncRepo();
+  } catch {
+    /* best-effort */
+  }
+
+  const commitSha = put.json?.commit?.sha || '';
+  const commitUrl =
+    put.json?.commit?.html_url ||
+    (commitSha
+      ? `https://github.com/${owner}/${repo}/commit/${commitSha}`
+      : `https://github.com/${owner}/${repo}`);
+  const fileUrl =
+    put.json?.content?.html_url ||
+    `https://github.com/${owner}/${repo}/blob/main/${norm.path}`;
 
   return {
     ok: true,
@@ -192,6 +220,7 @@ export async function writeDesignDoc(args = {}) {
     commitSha,
     commitUrl,
     fileUrl,
+    via: 'contents_api',
   };
 }
 
@@ -218,54 +247,36 @@ export async function openIssue(args = {}) {
     ? args.labels.filter((l) => typeof l === 'string').slice(0, 5)
     : [];
 
-  try {
-    const res = await fetch(
-      `${githubApiBase()}/repos/${owner}/${repo}/issues`,
-      {
-        method: 'POST',
-        headers: {
-          accept: 'application/vnd.github+json',
-          authorization: `Bearer ${tok.token}`,
-          'content-type': 'application/json',
-          'user-agent': 'hermes-game-agent',
-          'x-github-api-version': '2022-11-28',
-        },
-        body: JSON.stringify({
-          title,
-          body,
-          ...(labels.length ? { labels } : {}),
-        }),
-      },
-    );
-    const text = await res.text();
-    let json = null;
-    try {
-      json = JSON.parse(text);
-    } catch {
-      json = null;
-    }
-    if (!res.ok) {
-      return {
-        ok: false,
-        error: 'github_api_error',
-        status: res.status,
-        detail: redactSecrets(
-          (json && (json.message || JSON.stringify(json))) || text,
-        ).slice(0, 500),
-      };
-    }
-    return {
-      ok: true,
-      number: json?.number,
-      url: json?.html_url,
-      title: json?.title,
-      author: gitAuthorName(),
-    };
-  } catch (err) {
+  const { res, json, text } = await ghJson(
+    'POST',
+    `/repos/${owner}/${repo}/issues`,
+    tok.token,
+    {
+      title,
+      body,
+      ...(labels.length ? { labels } : {}),
+    },
+  );
+
+  if (!res.ok) {
     return {
       ok: false,
-      error: 'github_fetch_failed',
-      detail: redactSecrets(err?.message || String(err)),
+      error: 'github_api_error',
+      status: res.status,
+      detail: redactSecrets(
+        (json && (json.message || JSON.stringify(json))) || text,
+      ).slice(0, 500),
+      hint:
+        res.status === 403
+          ? 'Use a Pain2023 classic PAT (ghp_...) with repo scope.'
+          : undefined,
     };
   }
+  return {
+    ok: true,
+    number: json?.number,
+    url: json?.html_url,
+    title: json?.title,
+    author: gitAuthorName(),
+  };
 }
