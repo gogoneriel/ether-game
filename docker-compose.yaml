@@ -5,7 +5,7 @@ services:
     build:
       context: ./hermes-game-agent
       args:
-        CACHEBUST: "pain-2026-07-23b"
+        CACHEBUST: "pain-1784774002"
     container_name: hermes-game-agent
     restart: unless-stopped
     environment:
