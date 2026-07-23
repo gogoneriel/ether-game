@@ -5,7 +5,7 @@ services:
     build:
       context: ./hermes-game-agent
       args:
-        CACHEBUST: "pain-1784774002"
+        CACHEBUST: "pain-public-1784775104"
     container_name: hermes-game-agent
     restart: unless-stopped
     environment:
