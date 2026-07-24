@@ -1714,7 +1714,7 @@
      "rotation": 0,
      "visible": true,
      "x": 832,
-     "y": 256,
+     "y": 576,
      "width": 64,
      "height": 64
     },
@@ -1725,8 +1725,8 @@
      "rotation": 0,
      "visible": true,
      "x": 832,
-     "y": 576,
-     "width": 64,
+     "y": 640,
+     "width": 128,
      "height": 64
     },
     {
@@ -1736,35 +1736,13 @@
      "rotation": 0,
      "visible": true,
      "x": 832,
-     "y": 640,
-     "width": 128,
-     "height": 64
-    },
-    {
-     "id": 1043,
-     "name": "wall-1043",
-     "type": "wall",
-     "rotation": 0,
-     "visible": true,
-     "x": 832,
      "y": 1088,
      "width": 192,
      "height": 64
     },
     {
-     "id": 1044,
-     "name": "wall-1044",
-     "type": "wall",
-     "rotation": 0,
-     "visible": true,
-     "x": 896,
-     "y": 960,
-     "width": 128,
-     "height": 64
-    },
-    {
-     "id": 1045,
-     "name": "wall-1045",
+     "id": 1043,
+     "name": "wall-1043",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -1774,30 +1752,8 @@
      "height": 64
     },
     {
-     "id": 1046,
-     "name": "wall-1046",
-     "type": "wall",
-     "rotation": 0,
-     "visible": true,
-     "x": 960,
-     "y": 192,
-     "width": 384,
-     "height": 64
-    },
-    {
-     "id": 1047,
-     "name": "wall-1047",
-     "type": "wall",
-     "rotation": 0,
-     "visible": true,
-     "x": 960,
-     "y": 256,
-     "width": 192,
-     "height": 64
-    },
-    {
-     "id": 1048,
-     "name": "wall-1048",
+     "id": 1044,
+     "name": "wall-1044",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -1807,19 +1763,8 @@
      "height": 64
     },
     {
-     "id": 1049,
-     "name": "wall-1049",
-     "type": "wall",
-     "rotation": 0,
-     "visible": true,
-     "x": 960,
-     "y": 896,
-     "width": 64,
-     "height": 64
-    },
-    {
-     "id": 1050,
-     "name": "wall-1050",
+     "id": 1045,
+     "name": "wall-1045",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -1829,8 +1774,30 @@
      "height": 128
     },
     {
-     "id": 1051,
-     "name": "wall-1051",
+     "id": 1046,
+     "name": "wall-1046",
+     "type": "wall",
+     "rotation": 0,
+     "visible": true,
+     "x": 1024,
+     "y": 192,
+     "width": 320,
+     "height": 64
+    },
+    {
+     "id": 1047,
+     "name": "wall-1047",
+     "type": "wall",
+     "rotation": 0,
+     "visible": true,
+     "x": 1024,
+     "y": 256,
+     "width": 128,
+     "height": 64
+    },
+    {
+     "id": 1048,
+     "name": "wall-1048",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -1840,8 +1807,8 @@
      "height": 64
     },
     {
-     "id": 1052,
-     "name": "wall-1052",
+     "id": 1049,
+     "name": "wall-1049",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -1851,13 +1818,46 @@
      "height": 64
     },
     {
+     "id": 1050,
+     "name": "wall-1050",
+     "type": "wall",
+     "rotation": 0,
+     "visible": true,
+     "x": 1088,
+     "y": 640,
+     "width": 64,
+     "height": 64
+    },
+    {
+     "id": 1051,
+     "name": "wall-1051",
+     "type": "wall",
+     "rotation": 0,
+     "visible": true,
+     "x": 1088,
+     "y": 704,
+     "width": 192,
+     "height": 128
+    },
+    {
+     "id": 1052,
+     "name": "wall-1052",
+     "type": "wall",
+     "rotation": 0,
+     "visible": true,
+     "x": 1088,
+     "y": 896,
+     "width": 64,
+     "height": 64
+    },
+    {
      "id": 1053,
      "name": "wall-1053",
      "type": "wall",
      "rotation": 0,
      "visible": true,
      "x": 1088,
-     "y": 640,
+     "y": 1024,
      "width": 64,
      "height": 64
     },
@@ -1868,57 +1868,13 @@
      "rotation": 0,
      "visible": true,
      "x": 1088,
-     "y": 704,
-     "width": 384,
-     "height": 64
-    },
-    {
-     "id": 1055,
-     "name": "wall-1055",
-     "type": "wall",
-     "rotation": 0,
-     "visible": true,
-     "x": 1088,
-     "y": 768,
-     "width": 256,
-     "height": 64
-    },
-    {
-     "id": 1056,
-     "name": "wall-1056",
-     "type": "wall",
-     "rotation": 0,
-     "visible": true,
-     "x": 1088,
-     "y": 896,
-     "width": 64,
-     "height": 64
-    },
-    {
-     "id": 1057,
-     "name": "wall-1057",
-     "type": "wall",
-     "rotation": 0,
-     "visible": true,
-     "x": 1088,
-     "y": 1024,
-     "width": 64,
-     "height": 64
-    },
-    {
-     "id": 1058,
-     "name": "wall-1058",
-     "type": "wall",
-     "rotation": 0,
-     "visible": true,
-     "x": 1088,
      "y": 1152,
      "width": 128,
      "height": 128
     },
     {
-     "id": 1059,
-     "name": "wall-1059",
+     "id": 1055,
+     "name": "wall-1055",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -1928,8 +1884,8 @@
      "height": 64
     },
     {
-     "id": 1060,
-     "name": "wall-1060",
+     "id": 1056,
+     "name": "wall-1056",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -1939,8 +1895,8 @@
      "height": 64
     },
     {
-     "id": 1061,
-     "name": "wall-1061",
+     "id": 1057,
+     "name": "wall-1057",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -1950,8 +1906,8 @@
      "height": 64
     },
     {
-     "id": 1062,
-     "name": "wall-1062",
+     "id": 1058,
+     "name": "wall-1058",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -1961,8 +1917,8 @@
      "height": 64
     },
     {
-     "id": 1063,
-     "name": "wall-1063",
+     "id": 1059,
+     "name": "wall-1059",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -1972,8 +1928,8 @@
      "height": 64
     },
     {
-     "id": 1064,
-     "name": "wall-1064",
+     "id": 1060,
+     "name": "wall-1060",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -1983,8 +1939,8 @@
      "height": 64
     },
     {
-     "id": 1065,
-     "name": "wall-1065",
+     "id": 1061,
+     "name": "wall-1061",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -1994,8 +1950,8 @@
      "height": 64
     },
     {
-     "id": 1066,
-     "name": "wall-1066",
+     "id": 1062,
+     "name": "wall-1062",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2005,8 +1961,8 @@
      "height": 64
     },
     {
-     "id": 1067,
-     "name": "wall-1067",
+     "id": 1063,
+     "name": "wall-1063",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2016,8 +1972,8 @@
      "height": 64
     },
     {
-     "id": 1068,
-     "name": "wall-1068",
+     "id": 1064,
+     "name": "wall-1064",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2027,8 +1983,8 @@
      "height": 64
     },
     {
-     "id": 1069,
-     "name": "wall-1069",
+     "id": 1065,
+     "name": "wall-1065",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2038,8 +1994,8 @@
      "height": 64
     },
     {
-     "id": 1070,
-     "name": "wall-1070",
+     "id": 1066,
+     "name": "wall-1066",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2049,8 +2005,8 @@
      "height": 64
     },
     {
-     "id": 1071,
-     "name": "wall-1071",
+     "id": 1067,
+     "name": "wall-1067",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2060,19 +2016,8 @@
      "height": 64
     },
     {
-     "id": 1072,
-     "name": "wall-1072",
-     "type": "wall",
-     "rotation": 0,
-     "visible": true,
-     "x": 1344,
-     "y": 832,
-     "width": 192,
-     "height": 64
-    },
-    {
-     "id": 1073,
-     "name": "wall-1073",
+     "id": 1068,
+     "name": "wall-1068",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2082,8 +2027,8 @@
      "height": 64
     },
     {
-     "id": 1074,
-     "name": "wall-1074",
+     "id": 1069,
+     "name": "wall-1069",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2093,8 +2038,8 @@
      "height": 64
     },
     {
-     "id": 1075,
-     "name": "wall-1075",
+     "id": 1070,
+     "name": "wall-1070",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2104,8 +2049,8 @@
      "height": 64
     },
     {
-     "id": 1076,
-     "name": "wall-1076",
+     "id": 1071,
+     "name": "wall-1071",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2115,8 +2060,8 @@
      "height": 64
     },
     {
-     "id": 1077,
-     "name": "wall-1077",
+     "id": 1072,
+     "name": "wall-1072",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2126,8 +2071,19 @@
      "height": 64
     },
     {
-     "id": 1078,
-     "name": "wall-1078",
+     "id": 1073,
+     "name": "wall-1073",
+     "type": "wall",
+     "rotation": 0,
+     "visible": true,
+     "x": 1472,
+     "y": 832,
+     "width": 64,
+     "height": 64
+    },
+    {
+     "id": 1074,
+     "name": "wall-1074",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2137,8 +2093,8 @@
      "height": 64
     },
     {
-     "id": 1079,
-     "name": "wall-1079",
+     "id": 1075,
+     "name": "wall-1075",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2148,8 +2104,8 @@
      "height": 64
     },
     {
-     "id": 1080,
-     "name": "wall-1080",
+     "id": 1076,
+     "name": "wall-1076",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2159,8 +2115,8 @@
      "height": 64
     },
     {
-     "id": 1081,
-     "name": "wall-1081",
+     "id": 1077,
+     "name": "wall-1077",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2170,8 +2126,8 @@
      "height": 448
     },
     {
-     "id": 1082,
-     "name": "wall-1082",
+     "id": 1078,
+     "name": "wall-1078",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2181,8 +2137,8 @@
      "height": 64
     },
     {
-     "id": 1083,
-     "name": "wall-1083",
+     "id": 1079,
+     "name": "wall-1079",
      "type": "wall",
      "rotation": 0,
      "visible": true,
@@ -2192,8 +2148,8 @@
      "height": 192
     },
     {
-     "id": 1084,
-     "name": "wall-1084",
+     "id": 1080,
+     "name": "wall-1080",
      "type": "wall",
      "rotation": 0,
      "visible": true,
