@@ -5,7 +5,7 @@ services:
     build:
       context: ./hermes-game-agent
       args:
-        CACHEBUST: "design-approval-1784922688"
+        CACHEBUST: "mockup-gate-1784924631"
     container_name: hermes-game-agent
     restart: unless-stopped
     environment:

@@ -56,7 +56,7 @@ Spawns / NPCs / transitions object layers in `town.json` must not be deleted whe
 | Beauty 1x / @2x / normals | Liberview `public/game/maps/town-painted*.png` |
 | Collision | Liberview `public/game/maps/town.json` **and** ether-game `assets/maps/town.json` (sync overwrites Liberview from ether-game) |
 | Concept drafts | ether-game `docs/design/maps/*.png` (Pain commits here) |
-| **Current live look (mockup reference)** | ether-game `docs/design/maps/town-current.png` — snapshot of the painted town for Pain's `generate_map_image` mockups |
+| **Current live look (mockup reference)** | ether-game `docs/design/maps/town-current.png` — **896×704** downscale of the painted town for Pain's `generate_map_image` mockups (keep under ~1.5MB so OpenRouter stays fast) |
 
 ## Pain tool
 

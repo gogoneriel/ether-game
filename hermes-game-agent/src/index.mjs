@@ -7,6 +7,7 @@ import {
   extractAssistantText,
   extractToolCalls,
 } from './openrouter.mjs';
+import { MOCKUP_GATE_BLOCK, mockupGateAllows } from './mockupGate.mjs';
 import { resolvePersona } from './personas.mjs';
 import { syncRepo } from './repoSync.mjs';
 import {
@@ -130,7 +131,17 @@ async function runChat({ message, history, mode }) {
       } catch {
         args = {};
       }
-      const result = await runTool(name, args);
+      let result;
+      // Architect must show a mockup (or get an explicit skip) before building.
+      if (
+        name === 'start_game_change' &&
+        persona.id === 'architect' &&
+        !mockupGateAllows(messages)
+      ) {
+        result = { ...MOCKUP_GATE_BLOCK };
+      } else {
+        result = await runTool(name, args);
+      }
       toolTrace.push({ name, args, ok: result?.ok !== false });
       messages.push({
         role: 'tool',
