@@ -5,7 +5,7 @@ services:
     build:
       context: ./hermes-game-agent
       args:
-        CACHEBUST: "map-images-1784850000"
+        CACHEBUST: "toolleak-fix-1784873426"
     container_name: hermes-game-agent
     restart: unless-stopped
     environment:

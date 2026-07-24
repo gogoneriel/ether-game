@@ -19,6 +19,24 @@ const PORT = Number(process.env.PORT || 8080);
 const MAX_TOOL_ROUNDS = 4;
 const MAX_HISTORY = 12;
 
+/** GLM sometimes writes tool calls as text instead of structured tool_calls. */
+const TOOL_LEAK_RE = /<\|?\/?\s*tool[_-]?call|<toolcall|<\|assistant\|>|<\|observation\|>/i;
+
+/** Strip leaked pseudo-tool-call markup; returns cleaned text (may be ''). */
+function stripToolLeak(text) {
+  return String(text || '')
+    .replace(
+      /<\|?\/?\s*tool[_-]?call\b[^>]*>[\s\S]*?(?:<\/\|?\s*tool[_-]?call\s*>|$)/gi,
+      ' ',
+    )
+    .replace(/<\/?\|?\s*tool[_-]?call\b[^>]*>?/gi, ' ')
+    .replace(/<\/?toolcall\b[^>]*>?/gi, ' ')
+    .replace(/<toolcall[^>]*>?/gi, ' ')
+    .replace(/<\|[a-z_]+\|>/gi, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 function sendJson(res, status, body) {
   const payload = JSON.stringify(body);
   res.writeHead(status, {
@@ -82,7 +100,20 @@ async function runChat({ message, history, mode }) {
     });
 
     const toolCalls = extractToolCalls(lastJson);
-    if (!toolCalls.length) break;
+    if (!toolCalls.length) {
+      const text = extractAssistantText(lastJson);
+      if (TOOL_LEAK_RE.test(text) && round < MAX_TOOL_ROUNDS - 1) {
+        // Model wrote a tool call as text — push it back and demand a real call.
+        messages.push({ role: 'assistant', content: text.slice(0, 2000) });
+        messages.push({
+          role: 'system',
+          content:
+            'You wrote a tool call as plain text. That does nothing. Either call the tool through the function-calling interface (tool_calls), or answer the owner in plain words without any tool markup.',
+        });
+        continue;
+      }
+      break;
+    }
 
     const assistantMsg = lastJson.choices?.[0]?.message;
     messages.push({
@@ -118,7 +149,12 @@ async function runChat({ message, history, mode }) {
     });
   }
 
-  const reply = extractAssistantText(lastJson) || 'No reply from model.';
+  let reply = extractAssistantText(lastJson) || 'No reply from model.';
+  if (TOOL_LEAK_RE.test(reply)) {
+    reply =
+      stripToolLeak(reply) ||
+      'I tried to run a lookup and tripped over my own boots — ask me that again in one sentence.';
+  }
   return {
     reply,
     mode: persona.id,
