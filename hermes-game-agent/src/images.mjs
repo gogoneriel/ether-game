@@ -8,7 +8,7 @@ import { repoDir } from './repoSync.mjs';
 
 const IMAGE_MODEL =
   process.env.OPENROUTER_IMAGE_MODEL || 'google/gemini-2.5-flash-image';
-const NAME_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+export const NAME_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 /**
  * Resolve a reference image path strictly inside the ether-game clone.
@@ -48,39 +48,14 @@ function decodeDataUrl(dataUrl) {
 }
 
 /**
- * @param {{ prompt: string, name: string, referencePath?: string }} args
+ * Call the OpenRouter image model with multimodal content parts.
+ * @param {Array<object>} content
+ * @returns {Promise<{ok:true,buffer:Buffer}|{ok:false,error:string,detail?:string,status?:number}>}
  */
-export async function generateMapImage(args = {}) {
+export async function callImageModel(content) {
   const apiKey = (process.env.OPENROUTER_API_KEY || '').trim();
   if (!apiKey) {
     return { ok: false, error: 'OPENROUTER_API_KEY_missing' };
-  }
-
-  const prompt = String(args.prompt || '').trim();
-  if (!prompt) return { ok: false, error: 'empty_prompt' };
-
-  const name = String(args.name || '')
-    .trim()
-    .toLowerCase();
-  if (!NAME_RE.test(name)) {
-    return {
-      ok: false,
-      error: 'bad_name',
-      hint: 'name must be kebab-case letters/digits (e.g. magnolia-plaza-v2)',
-    };
-  }
-
-  /** @type {Array<object>} */
-  const content = [{ type: 'text', text: prompt }];
-  if (args.referencePath) {
-    const ref = resolveReferencePath(args.referencePath);
-    if (!ref.ok) return ref;
-    const bytes = readFileSync(ref.abs);
-    const b64 = bytes.toString('base64');
-    content.push({
-      type: 'image_url',
-      image_url: { url: `data:image/png;base64,${b64}` },
-    });
   }
 
   const base = (
@@ -162,16 +137,52 @@ export async function generateMapImage(args = {}) {
     return { ok: false, error: 'no_image_in_response', detail };
   }
 
+  return { ok: true, buffer: buf };
+}
+
+/**
+ * @param {{ prompt: string, name: string, referencePath?: string }} args
+ */
+export async function generateMapImage(args = {}) {
+  const prompt = String(args.prompt || '').trim();
+  if (!prompt) return { ok: false, error: 'empty_prompt' };
+
+  const name = String(args.name || '')
+    .trim()
+    .toLowerCase();
+  if (!NAME_RE.test(name)) {
+    return {
+      ok: false,
+      error: 'bad_name',
+      hint: 'name must be kebab-case letters/digits (e.g. magnolia-plaza-v2)',
+    };
+  }
+
+  /** @type {Array<object>} */
+  const content = [{ type: 'text', text: prompt }];
+  if (args.referencePath) {
+    const ref = resolveReferencePath(args.referencePath);
+    if (!ref.ok) return ref;
+    const bytes = readFileSync(ref.abs);
+    const b64 = bytes.toString('base64');
+    content.push({
+      type: 'image_url',
+      image_url: { url: `data:image/png;base64,${b64}` },
+    });
+  }
+
+  const generated = await callImageModel(content);
+  if (!generated.ok) return generated;
+
   const path = `docs/design/maps/${name}.png`;
   const written = await writeBinaryDesignFile({
     path,
-    buffer: buf,
+    buffer: generated.buffer,
     message: `map image ${name}`,
   });
   if (!written.ok) return written;
 
   const { owner, repo } = (() => {
-    // Match github.mjs defaults
     return { owner: 'gogoneriel', repo: 'ether-game' };
   })();
   const rawUrl = `https://raw.githubusercontent.com/${owner}/${repo}/main/${path}`;

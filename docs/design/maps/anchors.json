@@ -1,0 +1,61 @@
+{
+  "map": { "width": 1792, "height": 1408, "tile": 64 },
+  "anchors": {
+    "fountain": {
+      "x": 768,
+      "y": 512,
+      "w": 320,
+      "h": 320,
+      "note": "glowing crystal fountain at plaza center"
+    },
+    "plaza": {
+      "x": 640,
+      "y": 448,
+      "w": 576,
+      "h": 512,
+      "note": "full central plaza incl. fountain"
+    },
+    "piggy-bank": {
+      "x": 192,
+      "y": 480,
+      "w": 320,
+      "h": 320,
+      "note": "giant pink piggy bank vault, west of plaza"
+    },
+    "forest-gate": {
+      "x": 576,
+      "y": 0,
+      "w": 320,
+      "h": 192,
+      "note": "north path into the forest (transition ~820,100)"
+    },
+    "arena-gate": {
+      "x": 1280,
+      "y": 480,
+      "w": 384,
+      "h": 384,
+      "note": "east purple tower / arena stairs (NPC ~1448,688)"
+    },
+    "herald": {
+      "x": 640,
+      "y": 704,
+      "w": 256,
+      "h": 256,
+      "note": "Town Herald apron SW of fountain (NPC 728,808)"
+    },
+    "altar": {
+      "x": 960,
+      "y": 640,
+      "w": 256,
+      "h": 256,
+      "note": "Altar Keeper apron SE of fountain (NPC 1068,748)"
+    },
+    "guild-house": {
+      "x": 1088,
+      "y": 960,
+      "w": 384,
+      "h": 320,
+      "note": "south-east marketplace tents / guild area"
+    }
+  }
+}

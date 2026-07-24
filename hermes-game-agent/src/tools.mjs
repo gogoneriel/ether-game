@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { checkGameChange, startGameChange } from './cursorAgents.mjs';
 import { openIssue, shipPreview, writeDesignDoc } from './github.mjs';
 import { generateMapImage } from './images.mjs';
+import { editMapRegion } from './mapRegion.mjs';
 import { listRepoTree, readRepoFile, syncRepo } from './repoSync.mjs';
 
 let supabase = null;
@@ -220,9 +221,47 @@ export const TOOL_DEFINITIONS = [
   {
     type: 'function',
     function: {
+      name: 'edit_map_region',
+      description:
+        'PREFERRED for changing an existing spot on the Magnolia map. AI redraws ONLY the chosen region; code pastes it back onto the real map so everything else stays pixel-identical. Pass anchor (one of the names in docs/design/maps/anchors.json, e.g. fountain, plaza, piggy-bank, forest-gate, arena-gate, herald, altar, guild-house) OR an explicit rect in map pixels (1792x1408). Commits mockup-<name>.png + -preview.png. Show previewRawUrl as a markdown image, then ask Approve/Change/Cancel via ```options.',
+      parameters: {
+        type: 'object',
+        properties: {
+          anchor: {
+            type: 'string',
+            description: 'Named region from anchors.json (preferred)',
+          },
+          rect: {
+            type: 'object',
+            properties: {
+              x: { type: 'number' },
+              y: { type: 'number' },
+              w: { type: 'number' },
+              h: { type: 'number' },
+            },
+            description:
+              'Explicit pixel rect on the 1792x1408 map (only when no anchor fits)',
+          },
+          prompt: {
+            type: 'string',
+            description: 'The single visual change to apply inside the region',
+          },
+          name: {
+            type: 'string',
+            description:
+              'Kebab-case slug; mockup- prefix is added automatically (e.g. fountain-blue-v1)',
+          },
+        },
+        required: ['prompt', 'name'],
+      },
+    },
+  },
+  {
+    type: 'function',
+    function: {
       name: 'generate_map_image',
       description:
-        'Generate a map/concept/mockup image with Gemini and commit it to ether-game under docs/design/maps/<name>.png. For design-approval mockups of Magnolia changes: use referencePath docs/design/maps/town-current.png, name mockup-<slug>-vN, prompt = same map/style with only the requested change; show rawUrl as markdown image then ask Approve/Change/Cancel via ```options. For playable-map work ALWAYS produce two images: beauty (<name>) and walkable mask (<name>-mask) with flat #00FF00 walkable ground per docs/design/maps/README.md. Reply with markdown images using the rawUrl values.',
+        'Generate a map/concept/mockup image with Gemini and commit it to ether-game under docs/design/maps/<name>.png. Prefer edit_map_region for changes to existing Magnolia spots. For brand-new areas/concepts: use referencePath docs/design/maps/town-current.png, name mockup-<slug>-vN; show rawUrl as markdown image then ask Approve/Change/Cancel via ```options. For playable-map work ALWAYS produce two images: beauty (<name>) and walkable mask (<name>-mask) with flat #00FF00 walkable ground per docs/design/maps/README.md. Reply with markdown images using the rawUrl values.',
       parameters: {
         type: 'object',
         properties: {
@@ -415,6 +454,8 @@ export async function runTool(name, args = {}) {
       return checkGameChange(args);
     case 'ship_preview':
       return shipPreview(args);
+    case 'edit_map_region':
+      return editMapRegion(args);
     case 'generate_map_image':
       return generateMapImage(args);
     default:

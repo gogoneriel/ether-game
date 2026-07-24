@@ -56,12 +56,19 @@ Spawns / NPCs / transitions object layers in `town.json` must not be deleted whe
 | Beauty 1x / @2x / normals | Liberview `public/game/maps/town-painted*.png` |
 | Collision | Liberview `public/game/maps/town.json` **and** ether-game `assets/maps/town.json` (sync overwrites Liberview from ether-game) |
 | Concept drafts | ether-game `docs/design/maps/*.png` (Pain commits here) |
-| **Current live look (mockup reference)** | ether-game `docs/design/maps/town-current.png` — **896×704** downscale of the painted town for Pain's `generate_map_image` mockups (keep under ~1.5MB so OpenRouter stays fast) |
+| **Current live look (whole-map mockup ref)** | ether-game `docs/design/maps/town-current.png` — **896×704** downscale (keep under ~1.5MB) |
+| **Pixel-true region-edit source** | ether-game `docs/design/maps/town-full.png` — **1792×1408** (refresh with `npm run sync:map-refs` in Liberview whenever `public/game/maps/town-painted.png` changes) |
+| **Named regions** | ether-game `docs/design/maps/anchors.json` |
+| **Map-Maker skill** | ether-game `docs/design/maps/MAP_MAKER_SKILL.md` (auto-loaded into Pain) |
 
-## Pain tool
+## Region edits (preferred mockups)
+
+`edit_map_region` redraws **only** a named region (or explicit rect) and pastes it back onto `town-full.png`, so everything else stays pixel-identical to the live map. Commits `mockup-<slug>.png` + `mockup-<slug>-preview.png`. Show the preview, then ask Approve / Change / Cancel.
+
+## Whole-map / new-area concepts
 
 `generate_map_image` → commits PNG under `docs/design/maps/<kebab>.png`.
 
-**Design-approval mockups:** use `referencePath: docs/design/maps/town-current.png`, name `mockup-<slug>-vN`, show the image, then ask Approve / Change / Cancel via an `options` block. Concept art = intent, not final pixels.
+Use `referencePath: docs/design/maps/town-current.png`, name `mockup-<slug>-vN`, show the image, then ask Approve / Change / Cancel via an `options` block. Concept art = intent, not final pixels.
 
 **Playable map work:** always call twice: beauty + `<name>-mask`.
