@@ -222,7 +222,7 @@ export const TOOL_DEFINITIONS = [
     function: {
       name: 'generate_map_image',
       description:
-        'Generate a map/concept image with Gemini and commit it to ether-game under docs/design/maps/<name>.png. For playable-map work ALWAYS produce two images: beauty (<name>) and walkable mask (<name>-mask) with flat #00FF00 walkable ground per docs/design/maps/README.md. Reply with markdown images using the rawUrl values.',
+        'Generate a map/concept/mockup image with Gemini and commit it to ether-game under docs/design/maps/<name>.png. For design-approval mockups of Magnolia changes: use referencePath docs/design/maps/town-current.png, name mockup-<slug>-vN, prompt = same map/style with only the requested change; show rawUrl as markdown image then ask Approve/Change/Cancel via ```options. For playable-map work ALWAYS produce two images: beauty (<name>) and walkable mask (<name>-mask) with flat #00FF00 walkable ground per docs/design/maps/README.md. Reply with markdown images using the rawUrl values.',
       parameters: {
         type: 'object',
         properties: {
@@ -232,12 +232,13 @@ export const TOOL_DEFINITIONS = [
           },
           name: {
             type: 'string',
-            description: 'Kebab-case filename without .png (e.g. magnolia-plaza-v2)',
+            description:
+              'Kebab-case filename without .png (e.g. mockup-fountain-v1 or magnolia-plaza-v2)',
           },
           referencePath: {
             type: 'string',
             description:
-              'Optional path inside the ether-game clone to use as a reference image (e.g. docs/design/maps/town-ref.png)',
+              'Optional path inside the ether-game clone to use as a reference image. For Magnolia mockups use docs/design/maps/town-current.png',
           },
         },
         required: ['prompt', 'name'],

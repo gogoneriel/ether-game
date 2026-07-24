@@ -5,7 +5,7 @@ services:
     build:
       context: ./hermes-game-agent
       args:
-        CACHEBUST: "toolleak-fix-1784873426"
+        CACHEBUST: "design-approval-1784922688"
     container_name: hermes-game-agent
     restart: unless-stopped
     environment:
