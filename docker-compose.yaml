@@ -5,7 +5,7 @@ services:
     build:
       context: ./hermes-game-agent
       args:
-        CACHEBUST: "mockup-gate-1784924631"
+        CACHEBUST: "pain-locale-1784928000"
     container_name: hermes-game-agent
     restart: unless-stopped
     environment:

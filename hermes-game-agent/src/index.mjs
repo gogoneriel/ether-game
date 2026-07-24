@@ -8,6 +8,7 @@ import {
   extractToolCalls,
 } from './openrouter.mjs';
 import { MOCKUP_GATE_BLOCK, mockupGateAllows } from './mockupGate.mjs';
+import { localeSystemMessage, normalizeLocale } from './locale.mjs';
 import { resolvePersona } from './personas.mjs';
 import { syncRepo } from './repoSync.mjs';
 import {
@@ -59,14 +60,16 @@ async function readJson(req) {
   }
 }
 
-async function runChat({ message, history, mode }) {
+async function runChat({ message, history, mode, locale }) {
   const persona = resolvePersona(mode);
   const pack = loadKnowledgePack();
   const design = loadDesignDocs();
+  const lang = normalizeLocale(locale);
 
   /** @type {Array<{ role: string, content?: string, tool_calls?: object[], tool_call_id?: string, name?: string }>} */
   const messages = [
     { role: 'system', content: persona.system },
+    { role: 'system', content: localeSystemMessage(lang) },
     {
       role: 'system',
       content: `Knowledge pack (${pack.missing ? 'FALLBACK' : 'loaded'}${pack.truncated ? ', truncated' : ''}):\n\n${pack.text}`,
@@ -238,6 +241,7 @@ const server = http.createServer(async (req, res) => {
         return;
       }
       const mode = body.mode === 'analyzer' ? 'analyzer' : 'architect';
+      const locale = normalizeLocale(body.locale);
 
       if (!(process.env.OPENROUTER_API_KEY || '').trim()) {
         sendJson(res, 200, {
@@ -254,6 +258,7 @@ const server = http.createServer(async (req, res) => {
           message,
           history: body.history,
           mode,
+          locale,
         });
         sendJson(res, 200, { ...result, offline: false });
       } catch (err) {
