@@ -9,7 +9,7 @@ Pain (and Cloud agents) follow this when changing Magnolia town art or walkabili
 | Tiles | 28 × 22 |
 | Tile size | 64 px |
 | Display size | **1792 × 1408** |
-| Hi-res (2x) | **3584 × 2816** (`town-painted-2x.png`) for sharp zoom |
+| Hi-res (2x) | **3584 × 2816** (`town-painted-hires.png`) for sharp zoom |
 
 Game display always fills 1792×1408 (`MAP_BOUNDS.town`). High quality loads the @2x texture and scales it down in the scene.
 
