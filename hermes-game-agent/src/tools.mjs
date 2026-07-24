@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { checkGameChange, startGameChange } from './cursorAgents.mjs';
 import { openIssue, shipPreview, writeDesignDoc } from './github.mjs';
+import { generateMapImage } from './images.mjs';
 import { listRepoTree, readRepoFile, syncRepo } from './repoSync.mjs';
 
 let supabase = null;
@@ -216,6 +217,33 @@ export const TOOL_DEFINITIONS = [
       },
     },
   },
+  {
+    type: 'function',
+    function: {
+      name: 'generate_map_image',
+      description:
+        'Generate a map/concept image with Gemini and commit it to ether-game under docs/design/maps/<name>.png. For playable-map work ALWAYS produce two images: beauty (<name>) and walkable mask (<name>-mask) with flat #00FF00 walkable ground per docs/design/maps/README.md. Reply with markdown images using the rawUrl values.',
+      parameters: {
+        type: 'object',
+        properties: {
+          prompt: {
+            type: 'string',
+            description: 'Image generation prompt',
+          },
+          name: {
+            type: 'string',
+            description: 'Kebab-case filename without .png (e.g. magnolia-plaza-v2)',
+          },
+          referencePath: {
+            type: 'string',
+            description:
+              'Optional path inside the ether-game clone to use as a reference image (e.g. docs/design/maps/town-ref.png)',
+          },
+        },
+        required: ['prompt', 'name'],
+      },
+    },
+  },
 ];
 
 function sinceIso(days) {
@@ -386,6 +414,8 @@ export async function runTool(name, args = {}) {
       return checkGameChange(args);
     case 'ship_preview':
       return shipPreview(args);
+    case 'generate_map_image':
+      return generateMapImage(args);
     default:
       return { ok: false, error: `unknown_tool:${name}` };
   }

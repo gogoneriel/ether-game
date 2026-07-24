@@ -225,6 +225,140 @@ export async function writeDesignDoc(args = {}) {
   };
 }
 
+const MAP_PNG_RE = /^docs\/design\/maps\/[a-z0-9-]+\.png$/;
+
+/**
+ * Guard: only PNG under docs/design/maps/ (kebab-case filename).
+ * @param {string} relPath
+ */
+export function normalizeMapPngPath(relPath) {
+  if (!relPath || typeof relPath !== 'string') {
+    return { ok: false, error: 'bad_path' };
+  }
+  let cleaned = relPath.replace(/\\/g, '/').replace(/^\/+/, '');
+  if (cleaned.includes('..') || cleaned.includes('\0')) {
+    return { ok: false, error: 'path_forbidden' };
+  }
+  if (!cleaned.startsWith('docs/design/maps/')) {
+    if (!cleaned.includes('/')) {
+      cleaned = `docs/design/maps/${cleaned}`;
+    } else {
+      return { ok: false, error: 'path_must_be_under_docs_design_maps' };
+    }
+  }
+  if (!MAP_PNG_RE.test(cleaned)) {
+    return {
+      ok: false,
+      error: 'must_be_kebab_png_under_maps',
+      path: cleaned,
+      hint: 'Use docs/design/maps/<kebab-name>.png',
+    };
+  }
+  return { ok: true, path: cleaned };
+}
+
+/**
+ * Commit a PNG under docs/design/maps/ as Pain2023 via Contents API.
+ * @param {{ path: string, buffer: Buffer, message?: string }} args
+ */
+export async function writeBinaryDesignFile(args = {}) {
+  const tok = requireToken();
+  if (!tok.ok) return tok;
+
+  const norm = normalizeMapPngPath(args.path);
+  if (!norm.ok) return norm;
+
+  const buffer = Buffer.isBuffer(args.buffer) ? args.buffer : null;
+  if (!buffer || !buffer.length) {
+    return { ok: false, error: 'empty_buffer' };
+  }
+  // ~8 MiB payload guard (Contents API soft limit is higher; keep chat-safe).
+  if (buffer.length > 8 * 1024 * 1024) {
+    return {
+      ok: false,
+      error: 'png_too_large',
+      size: buffer.length,
+      max: 8 * 1024 * 1024,
+    };
+  }
+
+  const rawMsg = (args.message || `update ${norm.path}`).trim().slice(0, 200);
+  const message =
+    rawMsg.startsWith('Pain:') || rawMsg.startsWith('Hermes:')
+      ? rawMsg
+      : `Pain: ${rawMsg}`;
+  const name = gitAuthorName();
+  const email = gitAuthorEmail();
+  const { owner, repo } = repoSlug();
+  const apiPath = `/repos/${owner}/${repo}/contents/${norm.path}`;
+
+  const existing = await ghJson('GET', apiPath, tok.token);
+  let sha;
+  if (existing.res.status === 200 && existing.json?.sha) {
+    sha = existing.json.sha;
+  } else if (existing.res.status !== 404) {
+    return {
+      ok: false,
+      error: 'github_api_error',
+      status: existing.res.status,
+      detail: redactSecrets(
+        existing.json?.message || existing.text || String(existing.res.status),
+      ).slice(0, 500),
+    };
+  }
+
+  const payload = {
+    message,
+    content: buffer.toString('base64'),
+    committer: { name, email },
+    author: { name, email },
+  };
+  if (sha) payload.sha = sha;
+
+  const put = await ghJson('PUT', apiPath, tok.token, payload);
+  if (!put.res.ok) {
+    return {
+      ok: false,
+      error: 'github_api_error',
+      status: put.res.status,
+      detail: redactSecrets(
+        put.json?.message || put.text || String(put.res.status),
+      ).slice(0, 500),
+      hint:
+        put.res.status === 403
+          ? 'Use a Pain2023 classic PAT (ghp_...) with repo scope.'
+          : undefined,
+    };
+  }
+
+  try {
+    syncRepo();
+  } catch {
+    /* best-effort */
+  }
+
+  const commitSha = put.json?.commit?.sha || '';
+  const commitUrl =
+    put.json?.commit?.html_url ||
+    (commitSha
+      ? `https://github.com/${owner}/${repo}/commit/${commitSha}`
+      : `https://github.com/${owner}/${repo}`);
+  const fileUrl =
+    put.json?.content?.html_url ||
+    `https://github.com/${owner}/${repo}/blob/main/${norm.path}`;
+
+  return {
+    ok: true,
+    path: norm.path,
+    message,
+    author: name,
+    commitSha,
+    commitUrl,
+    fileUrl,
+    via: 'contents_api',
+  };
+}
+
 /**
  * Open an issue on ether-game as Pain2023.
  * @param {{ title: string, body?: string, labels?: string[] }} args
