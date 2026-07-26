@@ -158,7 +158,7 @@ export const TOOL_DEFINITIONS = [
     function: {
       name: 'start_game_change',
       description:
-        'Launch a Cursor Cloud agent that codes the owner request onto the LiberWallet `pain` preview branch (pain.liberether.com). Only one running change at a time. Always share agentUrl + previewUrl with the owner.',
+        'Launch a Cursor Cloud agent that codes the owner request. Always targets the LiberWallet `pain` preview branch → https://pain.liberether.com; production (main / wallet.liberether.com) is never touched. Only one running change at a time. Always share agentUrl + previewUrl with the owner. There is no repo choice — do not ask which repository.',
       parameters: {
         type: 'object',
         properties: {
@@ -170,10 +170,6 @@ export const TOOL_DEFINITIONS = [
             type: 'string',
             description:
               'Optional path to a design doc already saved (e.g. docs/design/town-fountain-spec-v1.md)',
-          },
-          repo: {
-            type: 'string',
-            description: 'liberview (default) or ether-game',
           },
         },
         required: ['request'],

@@ -1,17 +1,20 @@
 /**
  * Cursor Cloud Agents API (v1) — Pain launches code changes onto the `pain` branch.
  * Docs: https://cursor.com/docs/cloud-agent/api/endpoints
+ *
+ * Hard-locked: always Liberview `pain` → https://pain.liberether.com
+ * Never ether-game, never main / production.
  */
 
 const API_BASE = 'https://api.cursor.com/v1';
 
-const ALLOWED_REPOS = {
-  liberview: 'https://github.com/gogoneriel/Liberview',
-  'ether-game': 'https://github.com/gogoneriel/ether-game',
-};
-
+/** Only allowed code-change target. Specs/mockups still live in ether-game. */
+const PREVIEW_REPO_URL = 'https://github.com/gogoneriel/Liberview';
 const PREVIEW_BRANCH = 'pain';
 const PREVIEW_URL = 'https://pain.liberether.com';
+
+const PREVIEW_FAILURE_HINT =
+  'Could not start the preview build. All game changes go ONLY to the pain preview branch (pain.liberether.com). Offer the owner: try again, or cancel. Never mention other repos or production.';
 
 /** @type {string | null} */
 let lastAgentId = null;
@@ -59,18 +62,11 @@ async function cursorFetch(path, { method = 'GET', body } = {}) {
       error: 'cursor_api_error',
       status: res.status,
       detail: json,
+      hint: PREVIEW_FAILURE_HINT,
+      previewUrl: PREVIEW_URL,
     };
   }
   return { ok: true, data: json };
-}
-
-function resolveRepo(repoKey = 'liberview') {
-  const key = String(repoKey || 'liberview')
-    .trim()
-    .toLowerCase()
-    .replace(/^gogoneriel\//, '');
-  if (key === 'ether-game' || key === 'ethergame') return ALLOWED_REPOS['ether-game'];
-  return ALLOWED_REPOS.liberview;
 }
 
 function buildPrompt({ request, specPath }) {
@@ -124,6 +120,7 @@ async function findBusyPainAgent() {
 }
 
 /**
+ * Always targets Liberview `pain` preview. Ignores any repo arg from the model.
  * @param {{ request: string, specPath?: string, repo?: string }} args
  */
 export async function startGameChange(args = {}) {
@@ -149,7 +146,8 @@ export async function startGameChange(args = {}) {
     };
   }
 
-  const repoUrl = resolveRepo(args.repo);
+  // Hard-lock: never ether-game, never main. args.repo is ignored.
+  const repoUrl = PREVIEW_REPO_URL;
   const body = {
     prompt: {
       text: buildPrompt({
@@ -170,7 +168,15 @@ export async function startGameChange(args = {}) {
   };
 
   const created = await cursorFetch('/agents', { method: 'POST', body });
-  if (!created.ok) return created;
+  if (!created.ok) {
+    return {
+      ...created,
+      hint: created.hint || PREVIEW_FAILURE_HINT,
+      previewUrl: PREVIEW_URL,
+      branch: PREVIEW_BRANCH,
+      repoUrl,
+    };
+  }
 
   const agent = created.data?.agent || created.data;
   const run = created.data?.run;
@@ -234,7 +240,7 @@ export async function checkGameChange(args = {}) {
     message: finished
       ? `Done — look at ${PREVIEW_URL} in about 2 minutes (Vercel deploy).`
       : failed
-        ? 'The change failed or was cancelled. Ask the owner if they want to try again.'
+        ? 'The change failed or was cancelled. Ask the owner if they want to try again on the preview, or cancel.'
         : `Still ${runStatus.toLowerCase()}. Check again soon.`,
   };
 }

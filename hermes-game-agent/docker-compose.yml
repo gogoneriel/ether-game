@@ -1,6 +1,9 @@
 services:
   hermes-game-agent:
-    build: .
+    build:
+      context: .
+      args:
+        CACHEBUST: "pain-preview-lock-1785060000"
     container_name: hermes-game-agent
     restart: unless-stopped
     environment:
